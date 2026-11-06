@@ -4,35 +4,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<title>유튜브 영상 비교 분석</title>
+<title>유튜브 영상 분석</title>
 <style>
 *{box-sizing:border-box;border-radius:0}
 body{margin:0;background:#fff;color:#000;font:300 15px/1.65 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums}
 main{max-width:1080px;margin:0 auto;padding:64px 24px 96px}
 h1{margin:0;font-size:28px;font-weight:500;letter-spacing:-.02em}
 .lead{margin:6px 0 40px;color:#6b6b6b}
-form{display:grid;grid-template-columns:1fr 1fr auto;gap:24px;align-items:end}
+#ins{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}
+.act{display:flex;align-items:center;gap:6px;margin-top:20px}
+#cnt{margin-left:6px;font-size:13px}
 label span{display:block;margin-bottom:2px;font-size:12px;color:#6b6b6b}
 input{width:100%;padding:8px 0;border:0;border-bottom:1px solid #000;background:transparent;color:#000;font:inherit}
 input::placeholder{color:#b5b5b5}
 input:focus-visible{outline:0;border-bottom-width:2px;padding-bottom:7px}
-button{padding:10px 30px;border:0;background:#000;color:#fff;font:inherit;font-weight:500;cursor:pointer}
+button{padding:6px 0;border:0;background:none;color:#000;font:inherit;font-weight:500;cursor:pointer}
+button:hover:not(:disabled){text-decoration:underline;text-underline-offset:4px}
 button:focus-visible{outline:2px solid #000;outline-offset:3px}
-button:disabled{background:#b5b5b5;cursor:default}
+button:disabled{color:#b5b5b5;cursor:default}
+#go{margin-right:20px;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+.ghost{padding:6px 8px;font-size:14px;font-weight:300}
 #msg{margin:16px 0 0;color:#6b6b6b}
-.grid{display:grid;grid-template-columns:1fr 1fr;margin-top:56px;align-items:start}
-.col{min-width:0;padding:0 32px}
-.col:first-child{padding-left:0}
-.col+.col{padding-right:0;border-left:1px solid #e6e6e6}
-img.th{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
-.title{margin:16px 0 4px;font-size:19px;font-weight:500;line-height:1.4}
-.sub{margin:0;color:#6b6b6b;font-size:13px}
-.stats{display:flex;gap:36px;margin-top:24px}
-.stats strong{display:block;font-size:26px;font-weight:300;line-height:1.2}
-.stats span{font-size:12px;color:#6b6b6b}
 h2{margin:48px 0 14px;padding-top:12px;border-top:1px solid #000;font-size:13px;font-weight:500}
 h2 .mu{font-weight:300}
 b{font-weight:500}
+.mu{color:#6b6b6b}
+.sub{display:block;color:#6b6b6b;font-size:12px;font-weight:300}
+.note{margin:10px 0 0;color:#6b6b6b;font-size:12px}
+.sc{overflow-x:auto}
+table.m{width:100%;min-width:520px;border-collapse:collapse}
+.m th,.m td{text-align:left;vertical-align:top;font-weight:300}
+.m thead th{min-width:150px;padding:0 16px 14px 0;border-bottom:1px solid #000;vertical-align:bottom}
+.m tbody th{padding:10px 20px 10px 0;border-bottom:1px solid #e6e6e6;color:#6b6b6b;font-size:13px;white-space:nowrap}
+.m td{padding:10px 16px 10px 0;border-bottom:1px solid #e6e6e6}
+.m thead a{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:8px;color:#000;font-weight:500;text-decoration:none;line-height:1.4}
+.best{font-weight:500;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+img.th{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:64px 0;margin-top:24px;align-items:start}
+.grid.one{grid-template-columns:1fr}
+.col{min-width:0}
+.col:nth-child(odd){padding-right:32px}
+.col:nth-child(even){padding-left:32px;border-left:1px solid #e6e6e6}
+.grid.one .col{padding:0;border:0}
+.vt{margin:0;font-size:15px}
+.vt b{margin-right:8px}
 canvas{display:block;width:100%;height:auto}
 ol{margin:0;padding:0;list-style:none}
 .rk{color:#b5b5b5}
@@ -42,40 +57,44 @@ ol{margin:0;padding:0;list-style:none}
 .cl .top{display:flex;justify-content:space-between;gap:12px}
 .cl .meta{display:flex;gap:14px;font-size:12px;color:#6b6b6b}
 .cl p{margin:6px 0 0;white-space:pre-wrap;word-break:break-word}
-.mu{color:#6b6b6b}
 .info>p,.cmt>p{margin:0;padding:10px 0}
 @media(max-width:760px){
   main{padding:40px 16px 64px}
-  form,.grid{grid-template-columns:1fr}
-  form{gap:20px}
-  .col,.col:first-child,.col+.col{padding:0;border:0}
-  .col+.col{margin-top:56px;padding-top:40px;border-top:1px solid #000}
+  #ins{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr;gap:0}
+  .grid .col,.grid .col:nth-child(even){padding:0;border:0}
+  .grid .col+.col{margin-top:56px;padding-top:40px;border-top:1px solid #000}
 }
 </style>
 </head>
 <body>
 <main>
-  <h1>유튜브 영상 비교</h1>
-  <p class="lead">두 영상의 통계와 댓글을 나란히 확인합니다.</p>
+  <h1>유튜브 영상 분석</h1>
+  <p class="lead">영상 1~4개를 입력하세요. 하나면 집중 분석하고, 둘 이상이면 나란히 비교합니다.</p>
   <form id="f">
-    <label><span>영상 A</span><input id="a" placeholder="https://youtu.be/..." required></label>
-    <label><span>영상 B</span><input id="b" placeholder="https://youtu.be/..." required></label>
-    <button id="go">분석</button>
+    <div id="ins"></div>
+    <div class="act">
+      <button id="go">분석</button>
+      <button type="button" id="add" class="ghost" aria-label="영상 칸 추가">+ 추가</button>
+      <button type="button" id="del" class="ghost" aria-label="영상 칸 삭제">− 삭제</button>
+      <span id="cnt" class="mu"></span>
+    </div>
   </form>
   <p id="msg"></p>
-  <div class="grid" id="out"></div>
+  <div id="cmp"></div>
+  <div id="out" class="grid"></div>
 </main>
- 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 <script>
-const WORKER = "https://yt-compare.pcofjeongchan.workers.dev/";
+const WORKER = "https://yt-compare.pcofjeongchan.workers.dev";
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const num = x => x == null ? "비공개" : Number(x).toLocaleString("ko-KR");
+const num = x => Number(x).toLocaleString("ko-KR");
 const when = iso => new Date(iso).toLocaleString("ko-KR");
- 
+let S = []; // 영상별 상태: { info, cm, err }
+
 function parseId(s) {
-  s = s.trim();
   if (/^[\w-]{11}$/.test(s)) return s;
   try {
     const u = new URL(s);
@@ -86,27 +105,87 @@ function parseId(s) {
   } catch {}
   return null;
 }
- 
-const get = (id, qs) =>
-  fetch(`${WORKER}/?id=${id}&${qs}`).then(async r => {
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error);
-    return j;
+const get = (id, qs) => fetch(`${WORKER}/?id=${id}&${qs}`).then(async r => {
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error);
+  return j;
+});
+
+// ---- 비교 지표 ----
+const pad = n => String(n).padStart(2, "0");
+const dur = iso => {
+  const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso || "");
+  if (!m) return null;
+  const [h, mi, s] = [m[1] | 0, m[2] | 0, m[3] | 0];
+  return (h ? h + ":" + pad(mi) : mi) + ":" + pad(s);
+};
+const age = iso => Math.max(1, Math.floor((Date.now() - new Date(iso)) / 864e5));
+const pct = (x, d = 1) => (x * 100).toFixed(d) + "%";
+const hour = h => (h < 12 ? "오전 " : "오후 ") + ((h % 12) || 12) + "시";
+const I = f => s => s.info ? f(s.info) : undefined;                       // 영상 정보 기반
+const C = f => s => s.cm ? (s.cm.metrics ? f(s.cm.metrics) : null) : undefined; // 댓글 기반
+const ratio = (i, k) => i.stats[k] == null || !+i.stats.views ? null : i.stats[k] / i.stats.views;
+
+// [이름, 값 가져오기, 표시 형식, 최댓값 강조 여부]
+const ROWS = [
+  ["게시일", I(i => i.publishedAt), v => new Date(v).toLocaleDateString("ko-KR")],
+  ["영상 길이", I(i => dur(i.duration)), v => v],
+  ["조회수", I(i => +i.stats.views), num, 1],
+  ["좋아요", I(i => i.stats.likes == null ? null : +i.stats.likes), num, 1],
+  ["댓글 수", I(i => i.stats.comments == null ? null : +i.stats.comments), num, 1],
+  ["좋아요율 (좋아요 ÷ 조회수)", I(i => ratio(i, "likes")), v => pct(v, 2), 1],
+  ["댓글률 (댓글 ÷ 조회수)", I(i => ratio(i, "comments")), v => pct(v, 2), 1],
+  ["게시 후 경과일", I(i => age(i.publishedAt)), v => num(v) + "일"],
+  ["일평균 조회수", I(i => Math.round(i.stats.views / age(i.publishedAt))), num, 1],
+  ["평균 댓글 길이", C(m => m.avgLen), v => v + "자"],
+  ["댓글당 평균 좋아요", C(m => m.avgLikes), v => v, 1],
+  ["좋아요 받은 댓글 비율", C(m => m.likedRatio), pct, 1],
+  ["질문(?) 포함 댓글 비율", C(m => m.questionRatio), pct, 1],
+  ["TOP10 댓글의 좋아요 쏠림", C(m => m.top10Share), pct],
+  ["댓글 최다 시간대 (KST)", C(m => m.peakHour), hour],
+];
+
+function renderCmp() {
+  const n = S.length;
+  const W = s => s.cm?.words || [];
+  const head = S.map((s, i) => `<th>${s.info
+    ? `<img class="th" src="${esc(s.info.thumbnail || "")}" alt=""><a href="https://www.youtube.com/watch?v=${esc(s.info.id)}" target="_blank" rel="noopener">${esc(s.info.title)}</a><span class="sub">${esc(s.info.channel)}</span>`
+    : s.err ? `<span class="mu">영상 ${i + 1}: ${esc(s.err)}</span>` : `<span class="mu">영상 ${i + 1} 불러오는 중…</span>`}</th>`).join("");
+
+  const rows = ROWS.map(([label, get, fmt, hi]) => {
+    const v = S.map(get);
+    const nums = v.filter(x => typeof x === "number");
+    const mark = hi && nums.length > 1 && Math.max(...nums) > Math.min(...nums);
+    return `<tr><th>${label}</th>${v.map(x => `<td${mark && x === Math.max(...nums) ? ' class="best"' : ""}>${
+      x === undefined ? '<span class="mu">…</span>' : x === null ? '<span class="mu">비공개·없음</span>' : fmt(x)}</td>`).join("")}</tr>`;
   });
- 
-function fillInfo(el, d) {
-  el.querySelector(".info").innerHTML = `
-    <img class="th" src="${esc(d.thumbnail || "")}" alt="">
-    <p class="title">${esc(d.title)}</p>
-    <p class="sub">${esc(d.channel)}</p>
-    <p class="sub">${when(d.publishedAt)}</p>
-    <div class="stats">
-      <div><strong>${num(d.stats.views)}</strong><span>조회수</span></div>
-      <div><strong>${num(d.stats.likes)}</strong><span>좋아요</span></div>
-      <div><strong>${num(d.stats.comments)}</strong><span>댓글</span></div>
-    </div>`;
+
+  const done = S.every(s => s.cm || s.err);
+  let common = "";
+  if (n > 1) {
+    rows.push(`<tr><th>이 영상만의 키워드</th>${S.map((s, i) => `<td>${!done ? '<span class="mu">…</span>' :
+      esc(W(s).filter(([w]) => S.every((o, j) => j === i || !W(o).some(x => x[0] === w))).slice(0, 5).map(x => x[0]).join(", ")) || "—"}</td>`).join("")}</tr>`);
+    const ok = S.filter(s => s.cm && s.cm.words.length);
+    if (done && ok.length > 1) {
+      const top = ok[0].cm.words.map(([w]) => [w, ok.map(s => (s.cm.words.find(x => x[0] === w) || [0, 0])[1])])
+        .filter(([, c]) => c.every(Boolean))
+        .sort((a, b) => b[1].reduce((x, y) => x + y) - a[1].reduce((x, y) => x + y)).slice(0, 10);
+      common = `<h2>공통 키워드 <span class="mu">모든 영상 댓글에 등장한 단어</span></h2>` + (top.length
+        ? `<div class="sc"><table class="m"><thead><tr><th>단어</th>${ok.map(s => `<th>영상 ${S.indexOf(s) + 1}</th>`).join("")}</tr></thead><tbody>${
+            top.map(([w, c]) => `<tr><th>${esc(w)}</th>${c.map(x => `<td>${x}회</td>`).join("")}</tr>`).join("")}</tbody></table></div>`
+        : '<p class="mu">모든 영상에 공통으로 등장한 단어가 없습니다.</p>');
+    }
+  }
+  $("#cmp").innerHTML = `<h2>${n > 1 ? "지표 비교" : "분석 지표"} ${n > 1 ? '<span class="mu">밑줄은 해당 항목의 최댓값</span>' : ""}</h2>
+    <div class="sc"><table class="m"><thead><tr><th></th>${head}</tr></thead><tbody>${rows.join("")}</tbody></table></div>
+    <p class="note">댓글 기반 지표는 분석한 댓글(영상당 최대 500개, 관련성 순)을 기준으로 한 값입니다.</p>${common}`;
 }
- 
+
+// ---- 영상별 상세 ----
+function fillInfo(el, i, d) {
+  el.querySelector(".info").innerHTML = `<p class="vt"><b>영상 ${i + 1}</b>${esc(d.title)}</p>`;
+}
+
 function fillComments(el, d, final) {
   const max = d.words[0]?.[1] || 1;
   const note = final ? "" : " · 나머지 불러오는 중…";
@@ -122,7 +201,7 @@ function fillComments(el, d, final) {
         <div class="top"><b>${esc(c.author)}</b><span>좋아요 ${num(c.likes)}</span></div>
         <div class="meta"><span>${when(c.publishedAt)}</span><span>답글 ${num(c.replies)}</span></div>
         <p>${esc(c.text)}</p></div></li>`).join("")}</ol>`;
- 
+
   const cv = el.querySelector("canvas");
   if (cv && d.words.length) {
     const colors = ["#0f766e", "#2563eb", "#d97706", "#be185d", "#7c3aed"];
@@ -141,38 +220,71 @@ function fillComments(el, d, final) {
       .catch(() => {}).then(draw);
   }
 }
- 
-// 영상 하나를 3단계로 나눠서 도착하는 대로 화면에 그림
-async function analyze(id) {
+
+// 영상 하나를 3단계(정보 → 댓글 100개 → 댓글 500개)로 나눠 도착하는 대로 그림
+async function analyze(id, i) {
   const el = document.createElement("section");
   el.className = "col";
-  el.innerHTML = '<div class="info"><p class="mu">영상 정보를 불러오는 중…</p></div><div class="cmt"></div>';
+  el.innerHTML = `<div class="info"><p class="mu">영상 ${i + 1} 불러오는 중…</p></div><div class="cmt"></div>`;
   $("#out").append(el);
   let loaded = false;
   try {
-    fillInfo(el, await get(id, "mode=info"));                         // 1단계: 제목·통계 (즉시)
+    S[i].info = await get(id, "mode=info");
+    fillInfo(el, i, S[i].info);
     loaded = true;
+    renderCmp();
     el.querySelector(".cmt").innerHTML = '<p class="mu">댓글 분석 중…</p>';
-    fillComments(el, await get(id, "mode=comments&pages=1"), false);  // 2단계: 댓글 100개 미리보기
+    S[i].cm = await get(id, "mode=comments&pages=1");
+    fillComments(el, S[i].cm, false);
+    renderCmp();
     const full = await get(id, "mode=comments&pages=5").catch(() => null);
-    if (full) fillComments(el, full, true);                           // 3단계: 최대 500개 전체
-    else el.querySelector("h2 .mu").textContent = "(분석 댓글 100개)";
+    if (full) { S[i].cm = full; fillComments(el, full, true); renderCmp(); }
+    else el.querySelector("h2 .mu").textContent = "분석 댓글 100개";
   } catch (err) {
+    S[i].err = err.message;
+    renderCmp();
     el.querySelector(loaded ? ".cmt" : ".info").innerHTML = `<p class="mu">분석에 실패했습니다: ${esc(err.message)}</p>`;
   }
 }
- 
+
+const MAX = 4;
+function setCount(n) {
+  const box = $("#ins");
+  n = Math.min(MAX, Math.max(1, n));
+  while (box.children.length < n) {
+    const k = box.children.length;
+    box.insertAdjacentHTML("beforeend",
+      `<label><span>영상 ${k + 1}${k ? " (선택)" : ""}</span><input placeholder="https://youtu.be/..."${k ? "" : " required"}></label>`);
+  }
+  while (box.children.length > n) box.lastElementChild.remove();
+  $("#add").disabled = n >= MAX;
+  $("#del").disabled = n <= 1;
+  $("#cnt").textContent = `${n} / ${MAX}`;
+}
+$("#add").onclick = () => { setCount($("#ins").children.length + 1); $("#ins").lastElementChild.querySelector("input").focus(); };
+$("#del").onclick = () => setCount($("#ins").children.length - 1);
+setCount(2);
+
 $("#f").addEventListener("submit", async e => {
   e.preventDefault();
-  const ids = [$("#a").value, $("#b").value].map(parseId);
-  if (ids.includes(null)) return $("#msg").textContent = "영상 링크를 확인해 주세요. (watch?v=, youtu.be, shorts 형식 지원)";
+  const ids = [];
+  for (const [k, inp] of [...document.querySelectorAll("#ins input")].entries()) {
+    const raw = inp.value.trim();
+    if (!raw) continue;
+    const id = parseId(raw);
+    if (!id) return $("#msg").textContent = `영상 ${k + 1}의 링크를 확인해 주세요. (watch?v=, youtu.be, shorts 형식 지원)`;
+    if (!ids.includes(id)) ids.push(id); // 같은 영상은 한 번만
+  }
+  if (!ids.length) return $("#msg").textContent = "영상 링크를 하나 이상 입력해 주세요.";
+  S = ids.map(() => ({}));
   $("#go").disabled = true;
   $("#msg").textContent = "";
   $("#out").innerHTML = "";
+  $("#out").className = "grid" + (ids.length === 1 ? " one" : "");
+  renderCmp();
   await Promise.all(ids.map(analyze));
   $("#go").disabled = false;
 });
 </script>
 </body>
 </html>
- 
