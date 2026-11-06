@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>유튜브 영상 비교 분석</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--tx:#1c1b19;--mu:#76726a;--bd:#e3e0d9;--ac:#0f766e}
+@media(prefers-color-scheme:dark){:root{--bg:#121413;--card:#1b1e1d;--tx:#eceae4;--mu:#9a968c;--bd:#2d3230;--ac:#2dd4bf}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:1120px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:24px;margin:0 0 16px}
+h2{font-size:15px;margin:20px 0 8px}
+form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+input{min-width:0;padding:11px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);font:inherit}
+input:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button{padding:11px 22px;border:0;border-radius:6px;background:var(--ac);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5}
+#msg{margin:12px 0 0;color:var(--mu)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.col{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:18px;min-width:0}
+.head{display:flex;gap:12px}
+.head img{width:128px;height:72px;object-fit:cover;border-radius:4px}
+.head b{display:block;line-height:1.35}
+.mu{color:var(--mu);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 0}
+.stats div{border:1px solid var(--bd);border-radius:4px;padding:8px 10px}
+.stats strong{display:block;font-size:18px}
+canvas{width:100%;height:auto;display:block}
+ol{margin:0;padding:0;list-style:none}
+.cm{padding:10px 0;border-top:1px solid var(--bd)}
+.cm p{margin:4px 0 0;white-space:pre-wrap;word-break:break-word}
+.w{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;padding:3px 0}
+.bar{height:8px;background:var(--ac);border-radius:2px}
+.w span:last-child{text-align:right;color:var(--mu)}
+@media(max-width:760px){form,.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <h1>유튜브 영상 2개 비교 분석</h1>
+  <form id="f">
+    <input id="a" placeholder="영상 링크 A" required>
+    <input id="b" placeholder="영상 링크 B" required>
+    <button id="go">분석하기</button>
+  </form>
+  <p id="msg"></p>
+  <div class="grid" id="out"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+<script>
+const WORKER = "https://yt-analyzer.YOUR-SUBDOMAIN.workers.dev"; // ← 배포한 Worker 주소로 교체
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = x => x == null ? "비공개" : Number(x).toLocaleString("ko-KR");
+const when = iso => new Date(iso).toLocaleString("ko-KR");
+
+function parseId(s) {
+  s = s.trim();
+  if (/^[\w-]{11}$/.test(s)) return s;
+  try {
+    const u = new URL(s);
+    if (u.hostname === "youtu.be") return u.pathname.slice(1, 12);
+    if (u.searchParams.get("v")) return u.searchParams.get("v");
+    const m = u.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{11})/);
+    if (m) return m[1];
+  } catch {}
+  return null;
+}
+
+function render(d, i) {
+  const max = d.words[0]?.[1] || 1;
+  const top10 = d.words.slice(0, 10);
+  const el = document.createElement("section");
+  el.className = "col";
+  el.innerHTML = `
+    <div class="head">
+      <img src="${esc(d.thumbnail || "")}" alt="">
+      <div><b>${esc(d.title)}</b><span class="mu">${esc(d.channel)} · ${when(d.publishedAt)}</span></div>
+    </div>
+    <div class="stats">
+      <div><span class="mu">조회수</span><strong>${num(d.stats.views)}</strong></div>
+      <div><span class="mu">좋아요</span><strong>${num(d.stats.likes)}</strong></div>
+      <div><span class="mu">댓글</span><strong>${num(d.stats.comments)}</strong></div>
+    </div>
+    <h2>댓글 워드클라우드 <span class="mu">(분석 댓글 ${d.sampled}개)</span></h2>
+    ${d.commentsOff ? '<p class="mu">댓글을 불러올 수 없습니다(비활성화 등).</p>' : '<canvas width="560" height="320"></canvas>'}
+    <h2>자주 등장한 단어 TOP 10</h2>
+    <ol>${top10.map(([w, c]) => `<li class="w"><span>${esc(w)}</span><span class="bar" style="width:${c / max * 100}%"></span><span>${c}</span></li>`).join("")}</ol>
+    <h2>좋아요 TOP 10 댓글</h2>
+    <ol>${d.topComments.map((c, n) => `
+      <li class="cm"><span class="mu">${n + 1}위 · <b>${esc(c.author)}</b> · 좋아요 ${num(c.likes)} · 답글 ${num(c.replies)} · ${when(c.publishedAt)}</span>
+      <p>${esc(c.text)}</p></li>`).join("")}</ol>`;
+  $("#out").append(el);
+
+  const cv = el.querySelector("canvas");
+  if (cv && d.words.length) {
+    const colors = ["#0f766e", "#2563eb", "#d97706", "#be185d", "#7c3aed"];
+    WordCloud(cv, {
+      list: d.words,
+      gridSize: 8,
+      weightFactor: s => 12 + (s / max) * 52,
+      fontFamily: 'Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+      color: () => colors[Math.random() * colors.length | 0],
+      backgroundColor: "transparent",
+      rotateRatio: 0,
+    });
+  }
+}
+
+$("#f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const ids = [$("#a").value, $("#b").value].map(parseId);
+  if (ids.includes(null)) return $("#msg").textContent = "영상 링크를 확인해 주세요. (watch?v=, youtu.be, shorts 형식 지원)";
+  $("#go").disabled = true;
+  $("#msg").textContent = "댓글을 불러와 분석하는 중입니다…";
+  $("#out").innerHTML = "";
+  try {
+    const res = await Promise.all(ids.map(id =>
+      fetch(`${WORKER}/?id=${id}`).then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; })));
+    res.forEach(render);
+    $("#msg").textContent = "";
+  } catch (err) {
+    $("#msg").textContent = "분석에 실패했습니다: " + err.message;
+  } finally {
+    $("#go").disabled = false;
+  }
+});
+</script>
+</body>
+</html>
