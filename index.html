@@ -51,7 +51,7 @@ ol{margin:0;padding:0;list-style:none}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 <script>
-const WORKER = "https://yt-analyzer.YOUR-SUBDOMAIN.workers.dev"; // ← 배포한 Worker 주소로 교체
+const WORKER = "https://yt-compare.pcofjeongchan.workers.dev/"; // ← 배포한 Worker 주소로 교체
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num = x => x == null ? "비공개" : Number(x).toLocaleString("ko-KR");
