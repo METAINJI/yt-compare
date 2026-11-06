@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <title>유튜브 영상 비교 분석</title>
 <style>
 *{box-sizing:border-box;border-radius:0}
-body{margin:0;background:#fff;color:#000;font:15px/1.65 Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums}
+body{margin:0;background:#fff;color:#000;font:300 15px/1.65 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums}
 main{max-width:1080px;margin:0 auto;padding:64px 24px 96px}
-h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em}
+h1{margin:0;font-size:28px;font-weight:500;letter-spacing:-.02em}
 .lead{margin:6px 0 40px;color:#6b6b6b}
 form{display:grid;grid-template-columns:1fr 1fr auto;gap:24px;align-items:end}
 label span{display:block;margin-bottom:2px;font-size:12px;color:#6b6b6b}
 input{width:100%;padding:8px 0;border:0;border-bottom:1px solid #000;background:transparent;color:#000;font:inherit}
 input::placeholder{color:#b5b5b5}
 input:focus-visible{outline:0;border-bottom-width:2px;padding-bottom:7px}
-button{padding:10px 30px;border:0;background:#000;color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button{padding:10px 30px;border:0;background:#000;color:#fff;font:inherit;font-weight:500;cursor:pointer}
 button:focus-visible{outline:2px solid #000;outline-offset:3px}
 button:disabled{background:#b5b5b5;cursor:default}
 #msg{margin:16px 0 0;color:#6b6b6b}
@@ -24,13 +25,14 @@ button:disabled{background:#b5b5b5;cursor:default}
 .col:first-child{padding-left:0}
 .col+.col{padding-right:0;border-left:1px solid #e6e6e6}
 img.th{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
-.title{margin:16px 0 4px;font-size:19px;font-weight:600;line-height:1.4}
+.title{margin:16px 0 4px;font-size:19px;font-weight:500;line-height:1.4}
 .sub{margin:0;color:#6b6b6b;font-size:13px}
 .stats{display:flex;gap:36px;margin-top:24px}
-.stats strong{display:block;font-size:26px;font-weight:600;line-height:1.2}
+.stats strong{display:block;font-size:26px;font-weight:300;line-height:1.2}
 .stats span{font-size:12px;color:#6b6b6b}
-h2{margin:48px 0 14px;padding-top:12px;border-top:1px solid #000;font-size:13px;font-weight:600}
-h2 .mu{font-weight:400}
+h2{margin:48px 0 14px;padding-top:12px;border-top:1px solid #000;font-size:13px;font-weight:500}
+h2 .mu{font-weight:300}
+b{font-weight:500}
 canvas{display:block;width:100%;height:auto}
 ol{margin:0;padding:0;list-style:none}
 .rk{color:#b5b5b5}
@@ -63,15 +65,15 @@ ol{margin:0;padding:0;list-style:none}
   <p id="msg"></p>
   <div class="grid" id="out"></div>
 </main>
-
+ 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 <script>
-const WORKER = "https://yt-compare.pcofjeongchan.workers.dev/"; // ← 배포한 Worker 주소로 교체
+const WORKER = "https://yt-analyzer.YOUR-SUBDOMAIN.workers.dev"; // ← 배포한 Worker 주소로 교체
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num = x => x == null ? "비공개" : Number(x).toLocaleString("ko-KR");
 const when = iso => new Date(iso).toLocaleString("ko-KR");
-
+ 
 function parseId(s) {
   s = s.trim();
   if (/^[\w-]{11}$/.test(s)) return s;
@@ -84,14 +86,14 @@ function parseId(s) {
   } catch {}
   return null;
 }
-
+ 
 const get = (id, qs) =>
   fetch(`${WORKER}/?id=${id}&${qs}`).then(async r => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
     return j;
   });
-
+ 
 function fillInfo(el, d) {
   el.querySelector(".info").innerHTML = `
     <img class="th" src="${esc(d.thumbnail || "")}" alt="">
@@ -104,7 +106,7 @@ function fillInfo(el, d) {
       <div><strong>${num(d.stats.comments)}</strong><span>댓글</span></div>
     </div>`;
 }
-
+ 
 function fillComments(el, d, final) {
   const max = d.words[0]?.[1] || 1;
   const note = final ? "" : " · 나머지 불러오는 중…";
@@ -120,22 +122,26 @@ function fillComments(el, d, final) {
         <div class="top"><b>${esc(c.author)}</b><span>좋아요 ${num(c.likes)}</span></div>
         <div class="meta"><span>${when(c.publishedAt)}</span><span>답글 ${num(c.replies)}</span></div>
         <p>${esc(c.text)}</p></div></li>`).join("")}</ol>`;
-
+ 
   const cv = el.querySelector("canvas");
   if (cv && d.words.length) {
-    const colors = ["#000", "#222", "#444", "#666"];
-    WordCloud(cv, {
+    const colors = ["#0f766e", "#2563eb", "#d97706", "#be185d", "#7c3aed"];
+    const draw = () => WordCloud(cv, {
       list: d.words,
       gridSize: 8,
-      weightFactor: s => 12 + (s / max) * 52,
-      fontFamily: 'Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+      weightFactor: s => 14 + (s / max) * 50,
+      fontFamily: '"Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+      fontWeight: "300",
       color: () => colors[Math.random() * colors.length | 0],
       backgroundColor: "transparent",
       rotateRatio: 0,
     });
+    // 웹폰트를 먼저 불러온 뒤 그려야 캔버스에도 같은 폰트가 적용됨
+    (document.fonts ? document.fonts.load('300 20px "Pretendard Variable"', d.words.map(w => w[0]).join("")) : Promise.resolve())
+      .catch(() => {}).then(draw);
   }
 }
-
+ 
 // 영상 하나를 3단계로 나눠서 도착하는 대로 화면에 그림
 async function analyze(id) {
   const el = document.createElement("section");
@@ -155,7 +161,7 @@ async function analyze(id) {
     el.querySelector(loaded ? ".cmt" : ".info").innerHTML = `<p class="mu">분석에 실패했습니다: ${esc(err.message)}</p>`;
   }
 }
-
+ 
 $("#f").addEventListener("submit", async e => {
   e.preventDefault();
   const ids = [$("#a").value, $("#b").value].map(parseId);
@@ -169,3 +175,4 @@ $("#f").addEventListener("submit", async e => {
 </script>
 </body>
 </html>
+ 
